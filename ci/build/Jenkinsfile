@@ -16,7 +16,7 @@ pipeline {
 			sh 'mvn clean package -DskipTests=true'
 			
             //script {
-                // this start the composer sssss
+                // this start the composer sssssaaa
                 // is a blocking call
                 // call this BEFORE services usage.
                 //ch.start()
