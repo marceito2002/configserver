@@ -69,6 +69,7 @@ pipeline {
               // if you need other code executed in always target
               // please call the stop method as first line!
               //ch.stop()
+			  echo ' post'
             }
     }
   }
