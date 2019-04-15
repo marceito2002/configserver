@@ -15,7 +15,7 @@ pipeline {
         steps {
 			// 1. Necesitaría generar el .jar para copiarlos en el directorio de /ci/consumer, porque el siguiente scrip lo necesitar para levantar docker images.,
 			echo ' VA A GENERAR EL JAR'
-//			sh 'mvn clean package -DskipTests=true'
+			sh 'mvn clean package -DskipTests=true'
 			
             //script {
                 // this start the composer
