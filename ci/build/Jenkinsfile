@@ -14,7 +14,8 @@ pipeline {
     stage('Prepare') {
         steps {
 			// 1. Necesitaría generar el .jar para copiarlos en el directorio de /ci/consumer, porque el siguiente scrip lo necesitar para levantar docker images.,
-			sh 'mvn clean package -DskipTests=true'
+			echo ' VA A GENERAR EL JAR'
+//			sh 'mvn clean package -DskipTests=true'
 			
             //script {
                 // this start the composer
@@ -30,48 +31,10 @@ pipeline {
 			sh 'mvn clean package -DskipTests=true'
 		}
 	}
-    stage('Bring up consumer') {
-        agent {
-        		
-        		// This is the definition of the container where the code build and the test should occur
-        		// you may use either a Dockerfile to be more flexible or an already existing image to speed up the build process
-        		// please make sure to always keep the 
-        		// 		 "args  ch.serviceArgs" 
-        		// line. If you need more args to be passed to the consumer container , append them to the  ch.serviceArgs string
-                
-        		dockerfile {
-                    reuseNode true
-                    filename "Dockerfile"
-                    dir "../../docker/" 
-                    args  ch.serviceArgs
-                }
-        }
-        stages{
-         // code in this substages is executed on the consumer connected to the services
-         stage ('build'){
-                steps {
-                    script {
-                    	echo "Hello World!"
-                        // I'm the build stage
-                        // I'll run in the consumer
-                    }
-                }
-            }
-        }
-    }
-    // other stages here are executed out the consumer
+
 
   }
 
-  post {
-    always {
-      script {
-              // DON'T forget this stop
-              // if you need other code executed in always target
-              // please call the stop method as first line!
-              ch.stop()
-            }
-    }
-  }
+  
 
 }
