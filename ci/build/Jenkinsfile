@@ -3,12 +3,10 @@
 // Also, you may need to keep updated the version of the cimagic library included at top of this file.
 //
 // Global composer Helper object
-//def ch = composerHelper jsonFile: "ci/services/services.json", debug: 1
+def ch = composerHelper jsonFile: "ci/services/services.json", debug: 1
 
 pipeline {
   agent any
-  
-
   echo 'ENTRA'
   
   stages {
