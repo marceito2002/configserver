@@ -7,7 +7,6 @@ def ch = composerHelper jsonFile: "ci/services/services.json", debug: 1
 
 pipeline {
   agent any
-  echo 'ENTRA'
   
   stages {
     stage('Prepare') {
