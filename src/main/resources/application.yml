@@ -9,7 +9,7 @@ spring:
     config:
       server:
         git:
-          uri: ${GIT_URI} #https://github.com/marceito2002/configServerPruebas #https://bitbucket.net-m.de/scm/frdwll/configuration.git         
+          uri: ${GIT_URI:https://github.com/marceito2002/configServerPruebas} #https://github.com/marceito2002/configServerPruebas #https://bitbucket.net-m.de/scm/frdwll/configuration.git
           username: ${GIT_USER} #alfonso.herreros
           password: ${GIT_PASS}
 #  rabbitmq:
