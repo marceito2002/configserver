@@ -184,9 +184,10 @@ pipeline {
 		            openshift.withCluster() {
 		            echo "EJECUTA OPENSHIFT"
 		            openshift.withProject(OPENSHIFT_PROJECT) {
-		            	echo "vemos los proyectow"
+
 		                echo "ok, estoy en el proyecto: ${openshift.project()}"
 		               	def latestDeploymentVersion = openshift.selector('dc',"configserver").object().status.latestVersion
+		               	echo "recoge selector"
 		               	echo latestDeploymentVersion
 		               	latestDeploymentVersion.describe()
 		               	
