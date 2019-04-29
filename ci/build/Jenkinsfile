@@ -188,6 +188,17 @@ pipeline {
 		                echo "ok, estoy en el proyecto: ${openshift.project()}"
 		               	def latestDeploymentVersion = openshift.selector('dc',"configserver").object().status.latestVersion
 		               	echo latestDeploymentVersion
+		               	latestDeploymentVersion.describe()
+		               	
+    // Selectors also allow you to easily iterate through all objects they currently select.
+    latestDeploymentVersion.withEach { // The closure body will be executed once for each selected object.
+        // The 'it' variable will be bound to a Selector which selects a single
+        // object which is the focus of the iteration.
+        echo "Service account: ${it.name()} is defined in ${openshift.project()}"
+    }
+    
+    
+    		               	
 		               // return !openshift.selector("bc", "${TEMPLATE_NAME}").exists();
 //		                openshift.newBuild("--name=${TEMPLATE_NAME}", "--docker-image=docker.io/nginx:mainline-alpine", "--binary=true")
 		                }
