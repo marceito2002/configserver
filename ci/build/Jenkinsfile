@@ -119,7 +119,35 @@ pipeline {
 //            }
 //        }
         
-		        
+
+		stage('Create Image Builder with plugin') {
+		    when {
+		        expression {
+			        echo "LAS VARIASBLES DE ENTORNO SON env.VAR version set - ${env.KUBERNETES_SERVICE_HOST} as well as VAR ${KUBERNETES_SERVICE_HOST}"
+		            openshift.withCluster() {
+		            echo "EJECUTA OPENSHIFT"
+		            openshift.withProject(NAME_PROJECT_OP) {
+		            	echo "vemos los proyectow"
+		                echo "ok, estoy en el proyecto: ${openshift.project()}"
+		               // return !openshift.selector("bc", "${TEMPLATE_NAME}").exists();
+		                openshift.newBuild("--name=${TEMPLATE_NAME}", "--docker-image=docker.io/nginx:mainline-alpine", "--binary=true")
+		                }
+		            }
+		        }
+		    }
+		    steps {
+		     echo "EJECUTA OPENSHIFT"
+	         script {
+		            openshift.withCluster() {
+		            echo "cluster OPENSHIFT"
+		                openshift.withProject(NAME_PROJECT_OP) {
+		                echo "ok, estoy en el proyecto: ${openshift.project()}"
+		                    openshift.newBuild("--name=${TEMPLATE_NAME}", "--docker-image=docker.io/nginx:mainline-alpine", "--binary=true")
+		                }
+		            }
+		        }
+		    }
+		}		        
         
         stage('Build') {
             steps {            	
