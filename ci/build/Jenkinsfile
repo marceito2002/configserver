@@ -142,7 +142,8 @@ pipeline {
 		            echo "cluster OPENSHIFT"
 		                openshift.withProject(OPENSHIFT_PROJECT) {
 		                echo "ok, estoy en el proyecto: ${openshift.project()}"
-		                    openshift.newBuild("--name=${TEMPLATE_NAME}", "--docker-image=docker.io/nginx:mainline-alpine", "--binary=true")
+		                    openshift.newApp("aherreros/microservicesdocomo:configserver-0.0.1-SNAPSHOT --name configservere")
+
 		                }
 		            }
 		        }
