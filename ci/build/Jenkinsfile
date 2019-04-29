@@ -83,9 +83,6 @@ pipeline {
 		
 		KUBERNETES_SERVICE_HOST="https://okd-milrc1.dodi.io"		
 		KUBERNETES_SERVICE_PORT_HTTPS="8443"		
-		DOCKER_REPOSITORY= "aherreros/microservicesdocomo"
-		DOCKER_USER="alfonso.herreros"
-		DOCKER_PASS="pepito"
 		
 		 
 //		SKIP_TLS=true
