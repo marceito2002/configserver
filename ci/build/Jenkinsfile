@@ -63,7 +63,7 @@ pipeline {
     tools {
         maven 'Maven 3.5.0'
         jdk 'jdk 8u71'     
-        oc 'oc3'		
+        oc 'oc3'
     }
           
     environment{
@@ -124,7 +124,9 @@ pipeline {
         stage('Build') {
             steps {            	
                 echo "Building artifact...$env.TAG_NAME"                
-                echo "Goal: $env.myBuildGoal and $env.myDeployGoal Revision $env.myRev Version: $env.myVersion"                
+                echo "Goal: $env.myBuildGoal and $env.myDeployGoal Revision $env.myRev Version: $env.myVersion"
+                sh 'oc'
+                                
                 sh 'mvn -B -DskipTests -Ddockerfile.skip=true clean package'
                
             }
@@ -145,7 +147,7 @@ pipeline {
             }
         }   
                                
-        stage('Deploy') {
+        stage('Deploy nexus') {
             steps {
             	sh "docker images"
             	
@@ -161,8 +163,9 @@ pipeline {
 
             	
                 echo 'Deloying in openshift....'
+                 
                 sh "oc login ${OPENSHIFT_ENPOINT} --token=${OPENSHIFT_TOKEN}"
-                sh "oc project $OPENSHIFT_PROJECT"      
+                sh "oc project $OPENSHIFT_PROJECT"                
                 echo "oc import-image configserver:configserver-$env.myVersion --from $DOCKER_REPOSITORY:configserver-$env.myVersion"                
 //                sh 'mvn deploy -DskipTests -Ddockerfile.username=$DOCKER_USER -Ddockerfile.password=$DOCKER_PASS'                 
                 //sh 'mvn deploy -DskipTests'
