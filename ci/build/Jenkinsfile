@@ -74,7 +74,7 @@ pipeline {
 		DOCKER_USER="alfonso.herreros"
 		DOCKER_PASS="pepito"
 				
-		OPENSHIFT_PROJECT = "prueba"
+		OPENSHIFT_PROJECT = "prueba11111"
 		OPENSHIFT_TOKEN="1GBRtUh37CLj2uWCSoyGKV3YQM-3os7ZZOvbsIjheMc"
 		OPENSHIFT_ENPOINT="https://okd-milrc1.dodi.io:8443"
 		
@@ -183,8 +183,23 @@ pipeline {
                 echo 'Deloying in openshift....'
                  
                 sh "oc login ${OPENSHIFT_ENPOINT} --token=${OPENSHIFT_TOKEN}"                
-                sh "oc project $OPENSHIFT_PROJECT"                
-                sh "oc new-app aherreros/microservicesdocomo:configserver-0.0.1-SNAPSHOT --name configserver"
+                sh "oc project $OPENSHIFT_PROJECT"
+                                
+//                sh "oc new-app aherreros/microservicesdocomo:configserver-0.0.1-SNAPSHOT --name configserver"
+                
+		        expression {
+			        echo "LAS VARIASBLES DE ENTORNO SON env.VAR version set - ${env.KUBERNETES_SERVICE_HOST} as well as VAR ${KUBERNETES_SERVICE_HOST}"
+		            openshift.withCluster() {
+		            echo "EJECUTA OPENSHIFT"
+		            openshift.withProject(OPENSHIFT_PROJECT) {
+		            	echo "vemos los proyectow"
+		                echo "ok, estoy en el proyecto: ${openshift.project()}"
+		               // return !openshift.selector("bc", "${TEMPLATE_NAME}").exists();
+//		                openshift.newBuild("--name=${TEMPLATE_NAME}", "--docker-image=docker.io/nginx:mainline-alpine", "--binary=true")
+		                }
+		            }
+		        }
+		                        
                 
                 echo "oc import-image configserver:configserver-$env.myVersion --from $DOCKER_REPOSITORY:configserver-$env.myVersion"                
 //                sh 'mvn deploy -DskipTests -Ddockerfile.username=$DOCKER_USER -Ddockerfile.password=$DOCKER_PASS'                 
