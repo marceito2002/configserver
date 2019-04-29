@@ -182,15 +182,33 @@ pipeline {
             	
                 echo 'Deloying in openshift....'
                  
-                sh "oc login ${OPENSHIFT_ENPOINT} --token=${OPENSHIFT_TOKEN}"
+                sh "oc login ${OPENSHIFT_ENPOINT} --token=${OPENSHIFT_TOKEN}"                
                 sh "oc project $OPENSHIFT_PROJECT"                
+                sh "oc new-app aherreros/microservicesdocomo:configserver-0.0.1-SNAPSHOT --name configserver"
+                
                 echo "oc import-image configserver:configserver-$env.myVersion --from $DOCKER_REPOSITORY:configserver-$env.myVersion"                
 //                sh 'mvn deploy -DskipTests -Ddockerfile.username=$DOCKER_USER -Ddockerfile.password=$DOCKER_PASS'                 
                 //sh 'mvn deploy -DskipTests'
             }          
         }                  
 
+        stage('configuration app in Openshift') {
+            steps {
 
+           	sh "oc set env dc/configserver GIT_URI=https://github.com/marceito2002/configServerPruebas.git" 
+			sh "oc set env dc/configserver GIT_PASS="
+			sh "oc set env dc/configserver GIT_USER="
+			sh "oc set env dc/configserver  SPRING_PROFILES_ACTIVE=openshift" 
+		Listar catálogo de aplicaciones 
+			sh "oc get is -n openshift" 
+//		Crear el router 
+			sh "oc expose svc/configserver" 
+//		Actualizar cuando cambia la imagen docker 
+//		sh "oc import-image configserver:configserver-0.0.1-SNAPSHOT --from aherreros/microservicesdocomo:configserver-0.0.1-SNAPSHOT
+                 
+            }          
+        }  
+        
 		stage('Create Image Builder with plugin') {
 		    when {
 		        expression {
@@ -201,7 +219,7 @@ pipeline {
 		            	echo "vemos los proyectow"
 		                echo "ok, estoy en el proyecto: ${openshift.project()}"
 		               // return !openshift.selector("bc", "${TEMPLATE_NAME}").exists();
-		                openshift.newBuild("--name=${TEMPLATE_NAME}", "--docker-image=docker.io/nginx:mainline-alpine", "--binary=true")
+//		                openshift.newBuild("--name=${TEMPLATE_NAME}", "--docker-image=docker.io/nginx:mainline-alpine", "--binary=true")
 		                }
 		            }
 		        }
@@ -213,7 +231,7 @@ pipeline {
 		            echo "cluster OPENSHIFT"
 		                openshift.withProject(OPENSHIFT_PROJECT) {
 		                echo "ok, estoy en el proyecto: ${openshift.project()}"
-		                    openshift.newApp("aherreros/microservicesdocomo:configserver-0.0.1-SNAPSHOT --name configservere")
+//		                    openshift.newApp("aherreros/microservicesdocomo:configserver-0.0.1-SNAPSHOT --name configservere")
 
 		                }
 		            }
