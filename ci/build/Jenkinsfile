@@ -177,6 +177,23 @@ pipeline {
         }                  
 
         stage('Deploy Openshift') {
+        
+		    when {
+		        expression {
+			        echo "LAS VARIASBLES DE ENTORNO SON env.VAR version set - ${env.KUBERNETES_SERVICE_HOST} as well as VAR ${KUBERNETES_SERVICE_HOST}"
+		            openshift.withCluster() {
+		            echo "EJECUTA OPENSHIFT"
+		            openshift.withProject(OPENSHIFT_PROJECT) {
+		            	echo "vemos los proyectow"
+		                echo "ok, estoy en el proyecto: ${openshift.project()}"
+		               	def latestDeploymentVersion = openshift.selector('dc',"configserver").object().status.latestVersion
+		               	echo latestDeploymentVersion
+		               // return !openshift.selector("bc", "${TEMPLATE_NAME}").exists();
+//		                openshift.newBuild("--name=${TEMPLATE_NAME}", "--docker-image=docker.io/nginx:mainline-alpine", "--binary=true")
+		                }
+		            }
+		        }
+		    }        
             steps {
 
             	
@@ -186,32 +203,12 @@ pipeline {
                 sh "oc project $OPENSHIFT_PROJECT"
                                 
 //                sh "oc new-app aherreros/microservicesdocomo:configserver-0.0.1-SNAPSHOT --name configserver"
-                 when {
-		        expression {
-			        echo "LAS VARIASBLES DE ENTORNO SON env.VAR version set - ${env.KUBERNETES_SERVICE_HOST} as well as VAR ${KUBERNETES_SERVICE_HOST}"
-		            openshift.withCluster() {
-		            echo "EJECUTA OPENSHIFT"
-		            openshift.withProject(OPENSHIFT_PROJECT) {
-		            	echo "vemos los proyectow"
-		                echo "ok, estoy en el proyecto: ${openshift.project()}"
-		               	return !openshift.selector("bc", "${TEMPLATE_NAME}").exists();
-		               	
-		               	//dc/configserver deploys istag/configserver:configserver-0.0.1-SNAPSHOT
-		               	
-		               	def latestDeploymentVersion = openshift.selector('dc',"configserver").object().status.latestVersion
-		               	 
-		               	echo latestDeploymentVersion
-//		                openshift.newBuild("--name=${TEMPLATE_NAME}", "--docker-image=docker.io/nginx:mainline-alpine", "--binary=true")
-		                }
-		            }
-		        }
-		                        
+                           
                 
                 echo "oc import-image configserver:configserver-$env.myVersion --from $DOCKER_REPOSITORY:configserver-$env.myVersion"                
 //                sh 'mvn deploy -DskipTests -Ddockerfile.username=$DOCKER_USER -Ddockerfile.password=$DOCKER_PASS'                 
                 //sh 'mvn deploy -DskipTests'
-            }   
-           }       
+            }          
         }                  
 
         stage('configuration environment Openshift') {
