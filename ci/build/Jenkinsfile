@@ -1,77 +1,186 @@
-// Note: this is an example of Build Pipeline Structure. 
-// In order to use it you may need to change the directory where the composerHelper jsonfile is located for your project
-// Also, you may need to keep updated the version of the cimagic library included at top of this file.
-//
-// Global composer Helper object
-def ch = composerHelper jsonFile: "ci/services/services.json", debug: 1
+def source = env.TAG_NAME ? env.TAG_NAME : env.BRANCH_NAME
+
+def scopeMap  = [
+        "buildGoal"   : "deploy -DskipTests",
+        "profile" : "preprod",
+        "deployGoal" :"install",
+        "rev"    : source,
+		"deploy" : "false"
+]
+
+switch (source) {
+    case "master":
+        scopeMap.put("profile", "preprod")
+        scopeMap.put("version", "master-SNAPSHOT")
+		scopeMap.put("deploy", "true")
+        break
+        
+    case ~/\d*\.\d*\.\d*/:
+        scopeMap.put("profile", "preprod")
+        scopeMap.put("version", "$source")
+		scopeMap.put("deploy", "true")
+        break
+        
+    case ~/feature\/.*/:
+        scopeMap.put("profile", "preprod")
+        def array = source.toString().split('/')
+        if (array.length > 1) {
+            scopeMap.put("version", "${array[1]}-SNAPSHOT")
+        }
+
+        break
+    case ~/hotfix\/.*/:
+        scopeMap.put("profile", "preprod")
+        def array = source.toString().split('/')
+        if (array.length > 1) {
+            scopeMap.put("version", "${array[1]}-SNAPSHOT")
+        }
+        break
+        
+    case ~/bugfix\/.*/:
+        scopeMap.put("profile", "preprod")
+        def array = source.toString().split('/')
+        if (array.length > 1) {
+            scopeMap.put("version", "${array[1]}-SNAPSHOT")
+        }
+        break
+        
+    default:
+        echo "Nothing to do."
+}
+
+import com.buongiorno.jenkinsci.plugins.delivery.*;
+
+currentBuild.displayName = "#${currentBuild.number}: "+ scopeMap.get('buildGoal')+"&"+scopeMap.get('deployGoal')+" - "+scopeMap.get('profile')+" - "+ scopeMap.get('rev')
 
 pipeline {
-  agent any
-  
-  stages {
-    stage('Prepare') {
-        steps {
-			// 1. Necesitaría generar el .jar para copiarlos en el directorio de /ci/consumer, porque el siguiente scrip lo necesitar para levantar docker images.,
-			echo ' VA A GENERAR EL JAR'
-			sh 'mvn clean package -DskipTests=true'
-			
-            //script {
-                // this start the composer sssssaaa22233
-                // is a blocking call
-                // call this BEFORE services usage.
-                //ch.start()
-            //}
-      }
+    agent any
+
+    //agent {
+    //    docker { image 'appuio/oc:latest'}
+    //}   
+    
+    tools {
+        maven 'Maven 3.5.0'
+        jdk 'jdk 8u71'
+        oc 'oc3'
+    }
+          
+    environment{
+
+		COMPOSER_FOLDER = "./ci/local/"
+
+		DOCKER_REPOSITORY= "aherreros/microservicesdocomo"
+		DOCKER_USER="alfonso.herreros"
+		DOCKER_PASS="pepito"
+				
+		OPENSHIFT_PROJECT = "prueba"
+		OPENSHIFT_TOKEN="1GBRtUh37CLj2uWCSoyGKV3YQM-3os7ZZOvbsIjheMc"
+		OPENSHIFT_ENPOINT="https://okd-milrc1.dodi.io:8443"
+		
+		
+		TEMPLATE_NAME = "trackingPrueba"
+		
+		KUBERNETES_SERVICE_HOST="https://okd-milrc1.dodi.io"		
+		KUBERNETES_SERVICE_PORT_HTTPS="8443"		
+		DOCKER_REPOSITORY= "aherreros/microservicesdocomo"
+		DOCKER_USER="alfonso.herreros"
+		DOCKER_PASS="pepito"
+		
+		 
+//		SKIP_TLS=true
+				              
+
     }
 
-	stage('build') {
-		steps {
-			sh 'mvn clean package -DskipTests=true'
-		}
-	}
-    stage('Bring up consumer') {
-        agent {
-        		
-        		// This is the definition of the container where the code build and the test should occur
-        		// you may use either a Dockerfile to be more flexible or an already existing image to speed up the build process
-        		// please make sure to always keep the 
-        		// 		 "args  ch.serviceArgs" 
-        		// line. If you need more args to be passed to the consumer container , append them to the  ch.serviceArgs string
+    options {
+        disableConcurrentBuilds()
+        buildDiscarder(logRotator(numToKeepStr: '3', artifactNumToKeepStr: '3'))
+    }
+
+
+
+
+    stages {
+
+//        stage('Build') {
+//            steps {
+//                echo 'Building artifact....'
+//                echo "Goal: $env.myBuildGoal and $env.myDeployGoal Revision $env.myRev Version: $env.myVersion"                                
+                //sh "docker images"
                 
-        		dockerfile {
-                    reuseNode true
-                    filename "Dockerfile"
-                    dir "../../docker/" 
-                    args  ch.serviceArgs
-                }
+               // sh 'mvn clean install -DskipTests'  
+                
+//                echo sh(returnStdout: true, script: 'env')
+//                script {
+//                    build job: buildJob , parameters: [
+//                            string(name: 'goal', value: env.myBuildGoal),
+//                            string(name: 'GERRIT_REFNAME', value: env.myRev),
+//                            string(name: 'myVersion', value: env.myVersion)                            
+//                    ]
+//                }
+//            }
+//        }
+        
+		        
+        
+        stage('Build') {
+            steps {            	
+                echo "Building artifact...$env.TAG_NAME"                
+                echo "Goal: $env.myBuildGoal and $env.myDeployGoal Revision $env.myRev Version: $env.myVersion"                
+                sh 'mvn -B -DskipTests -Ddockerfile.skip=true clean package'
+               
+            }
         }
-        stages{
-         // code in this substages is executed on the consumer connected to the services
-         stage ('build'){
-                steps {
-                    script {
-                    	echo "Hello World!"
-                        // I'm the build stage
-                        // I'll run in the consumer
-                    }
-                }
+
+        stage('Install') {
+            steps {         
+                echo 'Install artifact....'
+                sh 'mvn -B clean install -DskipTests'                 
+            }
+        }
+        
+        stage('Test') {
+            steps {
+                echo 'Install artifact....'
+                echo "Goal: $env.myBuildGoal and $env.myDeployGoal Revision $env.myRev Version: $env.myVersion"
+                sh 'mvn -B clean install -Ddockerfile.skip=true'                 
+            }
+        }   
+                               
+        stage('Deploy') {
+            steps {
+            	sh "docker images"
+            	
+                echo 'Deloying artifact....'
+                echo "Goal: $env.myBuildGoal and $env.myDeployGoal Revision $env.myRev Version: $env.myVersion"
+//                sh 'mvn deploy -DskipTests -Ddockerfile.username=$DOCKER_USER -Ddockerfile.password=$DOCKER_PASS'                 
+                //sh 'mvn deploy -DskipTests'
+            }                        
+        }                  
+
+        stage('Deploy Openshift') {
+            steps {
+
+            	
+                echo 'Deloying in openshift....'
+                sh "oc project $OPENSHIFT_PROJECT"
+                sh "oc login ${OPENSHIFT_ENPOINT} --token=${OPENSHIFT_TOKEN}"
+                echo "oc import-image configserver:configserver-$env.myVersion --from $DOCKER_REPOSITORY:configserver-$env.myVersion"                
+//                sh 'mvn deploy -DskipTests -Ddockerfile.username=$DOCKER_USER -Ddockerfile.password=$DOCKER_PASS'                 
+                //sh 'mvn deploy -DskipTests'
+            }          
+        }                  
+
+    }
+    post {
+        always {
+            script {
+                currentBuild.result = currentBuild.result ?: 'SUCCESS'
+                //notifyBitbucket()
+                //echo 'stoping consumers....'
+                //sh 'docker-compose -f ./ci/local/docker-compose.yml down'                
             }
         }
     }
-    // other stages here are executed out the consumer
-
-  }
-
-  post {
-    always {
-      script {
-              // DON'T forget this stop
-              // if you need other code executed in always target
-              // please call the stop method as first line!
-              //ch.stop()
-			  echo ' post'
-            }
-    }
-  }
-
 }

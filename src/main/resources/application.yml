@@ -1,10 +1,10 @@
 server:  
-  port: ${PORT:8888} 
+  port: ${PORT:8080} 
       
         
 spring:  
   application:
-    name: configserver 
+    name: configserver
   cloud:
     config:
       server:
@@ -18,9 +18,9 @@ spring:
 #    username: guest
 #    password: guest
 
-local:
-   server:
-      port: 8080
+#local:
+#   server:
+#      port: 8080
       
   
 logging:

@@ -1,6 +1,5 @@
 package com.docomo.fraudwall.configserver;
 
-
 import static org.junit.Assert.assertEquals;
 
 import java.util.Map;
@@ -18,29 +17,24 @@ import org.springframework.util.MultiValueMap;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
-
-
 public class ConfigServerAppTest
-
 {
-	//
-	
-	private int port = 8888;
+
+	private int port = 9090;
 
 	@Test
-	public void configurationAvailable() {
+	public void configurationAvailableTracking() {
 		@SuppressWarnings("rawtypes")
-		ResponseEntity<Map> entity = new TestRestTemplate().getForEntity(
-				"http://localhost:" + port + "/configServer/tracking", Map.class);
+		ResponseEntity<Map> entity = new TestRestTemplate()
+				.getForEntity("http://localhost:" + port + "/configserver/tracking", Map.class);
 		assertEquals(HttpStatus.OK, entity.getStatusCode());
 	}
 
 	@Test
-	public void envPostAvailable() {
-		MultiValueMap<String, String> form = new LinkedMultiValueMap<String, String>();
+	public void configurationAvailablePartner() {
 		@SuppressWarnings("rawtypes")
-		ResponseEntity<Map> entity = new TestRestTemplate().postForEntity(
-				"http://localhost:" + port + "/configServer/partner", form, Map.class);
+		ResponseEntity<Map> entity = new TestRestTemplate()
+				.getForEntity("http://localhost:" + port + "/configserver/partner", Map.class);
 		assertEquals(HttpStatus.OK, entity.getStatusCode());
 	}
 }
