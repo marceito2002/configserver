@@ -186,7 +186,7 @@ pipeline {
                 sh "oc project $OPENSHIFT_PROJECT"
                                 
 //                sh "oc new-app aherreros/microservicesdocomo:configserver-0.0.1-SNAPSHOT --name configserver"
-                
+                 when {
 		        expression {
 			        echo "LAS VARIASBLES DE ENTORNO SON env.VAR version set - ${env.KUBERNETES_SERVICE_HOST} as well as VAR ${KUBERNETES_SERVICE_HOST}"
 		            openshift.withCluster() {
@@ -210,7 +210,8 @@ pipeline {
                 echo "oc import-image configserver:configserver-$env.myVersion --from $DOCKER_REPOSITORY:configserver-$env.myVersion"                
 //                sh 'mvn deploy -DskipTests -Ddockerfile.username=$DOCKER_USER -Ddockerfile.password=$DOCKER_PASS'                 
                 //sh 'mvn deploy -DskipTests'
-            }          
+            }   
+           }       
         }                  
 
         stage('configuration environment Openshift') {
