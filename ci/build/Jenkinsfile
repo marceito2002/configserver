@@ -62,7 +62,8 @@ pipeline {
     
     tools {
         maven 'Maven 3.5.0'
-        jdk 'jdk 8u71'
+        jdk 'jdk 8u71'     
+        oc 'oc3'		
     }
           
     environment{
