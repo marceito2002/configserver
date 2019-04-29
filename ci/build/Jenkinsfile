@@ -63,7 +63,7 @@ pipeline {
     tools {
         maven 'Maven 3.5.0'
         jdk 'jdk 8u71'     
-        //oc 'oc3'
+        oc 'oc3'
     }
           
     environment{
@@ -118,6 +118,24 @@ pipeline {
 //                }
 //            }
 //        }
+        
+//		oc project PRUEBA 
+//		Hacer un despliegue a partir de una imagen en docker hub 
+//			oc new-app aherreros/microservicesdocomo:configserver-0.0.1-SNAPSHOT --name configserver 
+//			Este me crea la imagen, pod, services, deployment... 
+//		Añadir las environment
+//			oc set env dc/configserver GIT_URI=https://github.com/marceito2002/configServerPruebas.git 
+//			oc set env dc/configserver GIT_PASS= 
+//			oc set env dc/configserver GIT_USER= 
+//			oc set env dc/configserver  SPRING_PROFILES_ACTIVE=openshift 
+//		Listar catálogo de aplicaciones 
+//			oc get is -n openshift 
+//		Crear el router 
+//			oc expose svc/configserver 
+//		Actualizar cuando cambia la imagen docker 
+//			oc import-image configserver:configserver-0.0.1-SNAPSHOT --from aherreros/microservicesdocomo:configserver-0.0.1-SNAPSHOT 
+
+
         
 
 		stage('Create Image Builder with plugin') {
