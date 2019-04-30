@@ -34,7 +34,7 @@ pipeline {
 			
 	   
 	
-			releasedVersion = readFile('pom.xml')
+			readFile('pom.xml')
 						    
                 echo "$releasedVersion ..Building artifact...Goal: $env.myBuildGoal and $env.myDeployGoal Revision $env.myRev Version: $env.myVersion"                                
 //                sh 'mvn -B -DskipTests -Ddockerfile.skip=true clean package'
