@@ -73,6 +73,8 @@ pipeline {
 		DOCKER_REPOSITORY= "aherreros/microservicesdocomo"
 		DOCKER_USER="alfonso.herreros"
 		DOCKER_PASS="pepito"
+		IMAGE=""
+		VERSION=""
 				
 		OPENSHIFT_PROJECT = "prueba"
 		OPENSHIFT_TOKEN="l7aP8WJIx0nuFHMX2fM-6eVVXXPNsNlSC4MRQ3xGasM"
