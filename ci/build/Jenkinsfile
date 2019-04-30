@@ -67,7 +67,7 @@ pipeline {
                 	try{                           		    
 	                	sh "oc new-app aherreros/microservicesdocomo:${artifactID}-${artifactVersion} --name ${artifactID}"
 	                	sh "oc expose svc/${artifactID}"
-                	}catch (all) {
+                	}catch (Exception e) {
                 		echo 'already exist....'
                 		sh "oc import-image ${artifactID}:${artifactID}-${artifactVersion} --from aherreros/microservicesdocomo:${artifactID}-${artifactVersion}"
                 	}finally{
