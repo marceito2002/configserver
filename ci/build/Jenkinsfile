@@ -35,6 +35,7 @@ pipeline {
 	   
 	
 			readMavenPom file: 'pom.xml'
+			caraCulo file: 'pom.xml'
 						    
                 echo ".Building artifact...Goal: $env.myBuildGoal and $env.myDeployGoal Revision $env.myRev Version: $env.myVersion"                                
 //                sh 'mvn -B -DskipTests -Ddockerfile.skip=true clean package'
