@@ -1,9 +1,7 @@
 def source = env.TAG_NAME ? env.TAG_NAME : env.BRANCH_NAME
 
-def buildProject() {
-return {    
+def buildProject() { 
 	 sh 'mvn asdfasdfasdfasdf'          
-  }
 }
 
 
@@ -97,9 +95,7 @@ pipeline {
         }  
         
         stage('Deploy Openshift Production') {
-            when {
-                branch 'master'
-            }                
+            when { branch 'master' }                
             steps {            	
                 echo 'Connecting with openshift PRO....'                 
                 sh "oc login ${OPENSHIFT_ENPOINT} --token=${OPENSHIFT_TOKEN}"                
