@@ -44,7 +44,8 @@ def deployImage() {
 }
 
 def updateEnvironment(env) {
-	i = 333 	
+	i = "prueba" 	
+	echo "ESTO ES UNA PRUEBA $i"
 	sh "oc set env dc/${artifactID} GIT_URI=https://github.com/marceito2002/configServerPruebas.git"
 	sh "oc set env dc/${artifactID} GIT_PASS="
 	sh "oc set env dc/${artifactID} GIT_USER="
