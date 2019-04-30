@@ -2,7 +2,7 @@ def source = env.TAG_NAME ? env.TAG_NAME : env.BRANCH_NAME
 
 def buildProject() {
 return {    
-	echo "ESTA EN UNA FUNCION"     
+	 sh 'mvn asdfasdfasdfasdf'          
   }
 }
 
