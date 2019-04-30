@@ -71,7 +71,7 @@ pipeline {
 	                	sh "oc expose svc/${artifactID}"
                 	}catch (all) {
                 		echo 'already exist....'
-                		sh "oc import-image ${artifactID}:${artifactID}-${artifactVersion} --from aherreros/microservicesdocomo:${artifactID}-${artifactVersion}T"
+                		sh "oc import-image ${artifactID}:${artifactID}-${artifactVersion} --from aherreros/microservicesdocomo:${artifactID}-${artifactVersion}"
                 	}finally{
                 		echo 'environment....'
 		           		sh "oc set env dc/${artifactID} GIT_URI=https://github.com/marceito2002/configServerPruebas.git"
@@ -96,6 +96,7 @@ pipeline {
 //		        	} catch (all) {
 //		            	echo "REVIENTA"
 //		            	sh "oc import-image ${artifactID}:${artifactID}-${artifactVersion} --from aherreros/microservicesdocomo:${artifactID}-${artifactVersion}T"
+//			oc import-image configserver:configserver-0.0.1-SNAPSHOT --from aherreros/microservicesdocomo:configserver-0.0.1-SNAPSHOT 
 //		        	}
 //	        	} 			                 
 //            }          
