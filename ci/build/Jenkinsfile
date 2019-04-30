@@ -1,94 +1,21 @@
 def source = env.TAG_NAME ? env.TAG_NAME : env.BRANCH_NAME
 
-def scopeMap  = [
-        "buildGoal"   : "deploy -DskipTests",
-        "profile" : "preprod",
-        "deployGoal" :"install",
-        "rev"    : source,
-		"deploy" : "false"
-]
-
-switch (source) {
-    case "master":
-        scopeMap.put("profile", "preprod")
-        scopeMap.put("version", "master-SNAPSHOT")
-		scopeMap.put("deploy", "true")
-        break
-        
-    case ~/\d*\.\d*\.\d*/:
-        scopeMap.put("profile", "preprod")
-        scopeMap.put("version", "$source")
-		scopeMap.put("deploy", "true")
-        break
-        
-    case ~/feature\/.*/:
-        scopeMap.put("profile", "preprod")
-        def array = source.toString().split('/')
-        if (array.length > 1) {
-            scopeMap.put("version", "${array[1]}-SNAPSHOT")
-        }
-
-        break
-    case ~/hotfix\/.*/:
-        scopeMap.put("profile", "preprod")
-        def array = source.toString().split('/')
-        if (array.length > 1) {
-            scopeMap.put("version", "${array[1]}-SNAPSHOT")
-        }
-        break
-        
-    case ~/bugfix\/.*/:
-        scopeMap.put("profile", "preprod")
-        def array = source.toString().split('/')
-        if (array.length > 1) {
-            scopeMap.put("version", "${array[1]}-SNAPSHOT")
-        }
-        break
-        
-    default:
-        echo "Nothing to do."
-}
 
 import com.buongiorno.jenkinsci.plugins.delivery.*;
-
-currentBuild.displayName = "#${currentBuild.number}: "+ scopeMap.get('buildGoal')+"&"+scopeMap.get('deployGoal')+" - "+scopeMap.get('profile')+" - "+ scopeMap.get('rev')
 
 pipeline {
     agent any
 
-    //agent {
-    //    docker { image 'appuio/oc:latest'}
-    //}   
-    
     tools {
         maven 'Maven 3.5.0'
         jdk 'jdk 8u71'     
         oc 'oc3'
     }
           
-    environment{
-
-		COMPOSER_FOLDER = "./ci/local/"
-
-		DOCKER_REPOSITORY= "aherreros/microservicesdocomo"
-		DOCKER_USER="alfonso.herreros"
-				
+    environment{				
 		OPENSHIFT_PROJECT = "prueba"
 		OPENSHIFT_TOKEN="l7aP8WJIx0nuFHMX2fM-6eVVXXPNsNlSC4MRQ3xGasM"
-		OPENSHIFT_ENPOINT="https://okd-milrc1.dodi.io:8443"
-		
-		//oc login https://okd-milrc1.dodi.io:8443 --token=l7aP8WJIx0nuFHMX2fM-6eVVXXPNsNlSC4MRQ3xGasM
-		
-		
-		TEMPLATE_NAME = "trackingPrueba"
-		
-		KUBERNETES_SERVICE_HOST="https://okd-milrc1.dodi.io"		
-		KUBERNETES_SERVICE_PORT_HTTPS="8443"		
-		
-		 
-//		SKIP_TLS=true
-				              
-
+		OPENSHIFT_ENPOINT="https://okd-milrc1.dodi.io:8443"					             
     }
 
     options {
@@ -96,55 +23,19 @@ pipeline {
         buildDiscarder(logRotator(numToKeepStr: '3', artifactNumToKeepStr: '3'))
     }
 
-
-
-
     stages {
-
-//        stage('Build') {
-//            steps {
-//                echo 'Building artifact....'
-//                echo "Goal: $env.myBuildGoal and $env.myDeployGoal Revision $env.myRev Version: $env.myVersion"                                
-                //sh "docker images"
-                
-               // sh 'mvn clean install -DskipTests'  
-                
-//                echo sh(returnStdout: true, script: 'env')
-//                script {
-//                    build job: buildJob , parameters: [
-//                            string(name: 'goal', value: env.myBuildGoal),
-//                            string(name: 'GERRIT_REFNAME', value: env.myRev),
-//                            string(name: 'myVersion', value: env.myVersion)                            
-//                    ]
-//                }
-//            }
-//        }
-        
-//		oc project PRUEBA 
-//		Hacer un despliegue a partir de una imagen en docker hub 
-//			oc new-app aherreros/microservicesdocomo:configserver-0.0.1-SNAPSHOT --name configserver 
-//			Este me crea la imagen, pod, services, deployment... 
-//		Añadir las environment
-//			oc set env dc/configserver GIT_URI=https://github.com/marceito2002/configServerPruebas.git 
-//			oc set env dc/configserver GIT_PASS= 
-//			oc set env dc/configserver GIT_USER= 
-//			oc set env dc/configserver  SPRING_PROFILES_ACTIVE=openshift 
-//		Listar catálogo de aplicaciones 
-//			oc get is -n openshift 
-//		Crear el router 
-//			oc expose svc/configserver 
-//		Actualizar cuando cambia la imagen docker 
-//			oc import-image configserver:configserver-0.0.1-SNAPSHOT --from aherreros/microservicesdocomo:configserver-0.0.1-SNAPSHOT 
-
-
-        
-	        
-        
+	           
         stage('Build') {
             steps {        
-               
-				readFile 'pom.xml'
-    
+            
+                           
+			//	def file = readFile 'pom.xml'
+			
+			def getReleasedVersion() {
+    			return (readFile('pom.xml') =~ '<version>(.+)-SNAPSHOT</version>')[0][1]
+			}
+			releasedVersion = getReleasedVersion()
+						    
                 echo "Building artifact...Goal: $env.myBuildGoal and $env.myDeployGoal Revision $env.myRev Version: $env.myVersion"                                
 //                sh 'mvn -B -DskipTests -Ddockerfile.skip=true clean package'
                
