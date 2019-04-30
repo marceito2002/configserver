@@ -19,7 +19,7 @@ pipeline {
 		OPENSHIFT_ENPOINT="https://okd-milrc1.dodi.io:8443"
 		
 		IMAGE = readMavenPom().getArtifactId()
-    	VERSION = readMavenPom().getVersion()
+    	VERSION = readMavenPom().getParentVersion()
     }
 
     options {
