@@ -75,10 +75,10 @@ pipeline {
 		DOCKER_PASS="pepito"
 				
 		OPENSHIFT_PROJECT = "prueba"
-		OPENSHIFT_TOKEN="naDgXfA2OHwd_TD9o6uWxhsX1CTrOnCUUJsFCyCeh0M"
+		OPENSHIFT_TOKEN="l7aP8WJIx0nuFHMX2fM-6eVVXXPNsNlSC4MRQ3xGasM"
 		OPENSHIFT_ENPOINT="https://okd-milrc1.dodi.io:8443"
 		
-		// oc login --token naDgXfA2OHwd_TD9o6uWxhsX1CTrOnCUUJsFCyCeh0M okd-milrc1.dodi.io:8443
+		//oc login https://okd-milrc1.dodi.io:8443 --token=l7aP8WJIx0nuFHMX2fM-6eVVXXPNsNlSC4MRQ3xGasM
 		
 		
 		TEMPLATE_NAME = "trackingPrueba"
@@ -230,9 +230,6 @@ pipeline {
 			sh "oc set env dc/configserver GIT_PASS="
 			sh "oc set env dc/configserver GIT_USER="
 			sh "oc set env dc/configserver  SPRING_PROFILES_ACTIVE=openshift" 
-//		Listar catálogo de aplicaciones 
-			sh "oc get is -n openshift" 
-//		Crear el router 
 			sh "oc expose svc/configserver" 
 //		Actualizar cuando cambia la imagen docker 
 //		sh "oc import-image configserver:configserver-0.0.1-SNAPSHOT --from aherreros/microservicesdocomo:configserver-0.0.1-SNAPSHOT
