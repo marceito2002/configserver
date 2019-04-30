@@ -225,34 +225,35 @@ pipeline {
 
         stage('configuration environment Openshift') {
             steps {
-try{
-           	sh "oc set env dc/configserver GIT_URI=https://github.com/marceito2002/configServerPruebas.git"
-}
-catch(e){
-     echo "REVIENTA 2"
-}
-finally{
-     echo "OK EL 1"
-}
-
-
-
-     
-			sh "oc set env dc/configserver GIT_PASS="
-			sh "oc set env dc/configserver GIT_USER="
-			sh "oc set env dc/configserver  SPRING_PROFILES_ACTIVE=openshift"
-			
-			try { 
-			sh "oc expose svc/configserver"
-			
-        } catch (e) {
-            // if any exception occurs, mark the build as failed
-            echo "REVIENTA"
-            currentBuild.result = 'FAILURE'
-            throw e
-        } 			 
-//		Actualizar cuando cambia la imagen docker 
-//		sh "oc import-image configserver:configserver-0.0.1-SNAPSHOT --from aherreros/microservicesdocomo:configserver-0.0.1-SNAPSHOT
+            	script {
+				try{
+	           		sh "oc set env dc/configserver GIT_URI=https://github.com/marceito2002/configServerPruebas.git"
+				}
+				catch(all){
+	     			echo "REVIENTA 2"
+				}
+				finally{
+	     			echo "OK EL 1"
+				}
+	
+	}
+	
+	     
+				sh "oc set env dc/configserver GIT_PASS="
+				sh "oc set env dc/configserver GIT_USER="
+				sh "oc set env dc/configserver  SPRING_PROFILES_ACTIVE=openshift"
+	script {			
+				try { 
+					sh "oc expose svc/configserver"			
+	        	} catch (all) {
+	            	// if any exception occurs, mark the build as failed
+	            	echo "REVIENTA"
+	            	currentBuild.result = 'FAILURE'
+	            	throw e
+	        	}
+	        	} 			 
+	//		Actualizar cuando cambia la imagen docker 
+	//		sh "oc import-image configserver:configserver-0.0.1-SNAPSHOT --from aherreros/microservicesdocomo:configserver-0.0.1-SNAPSHOT
                  
             }          
         }  
