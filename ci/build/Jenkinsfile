@@ -29,8 +29,7 @@ pipeline {
     stages {
 
         stage('Build') {
-            steps {                    	   				   
-                echo ".Building artifact...Goal: $env.myBuildGoal and $env.myDeployGoal Revision $env.myRev Version: $env.myVersion"                                
+            steps {                    	   				                                  
                 sh 'mvn -B -DskipTests -Ddockerfile.skip=true clean package'               
             }
         }
@@ -45,7 +44,6 @@ pipeline {
         stage('Test') {
             steps {
                 echo 'Install artifact....'
-                echo "Goal: $env.myBuildGoal and $env.myDeployGoal Revision $env.myRev Version: $env.myVersion"
                 sh 'mvn -B clean install -Ddockerfile.skip=true'                 
             }
         }   
@@ -53,7 +51,7 @@ pipeline {
         stage('Deploy nexus') {
             steps {            	
                 echo 'Deloying artifact....'
-                echo 'mvn deploy -DskipTests -Ddockerfile.username=$DOCKER_USER -Ddockerfile.password=$DOCKER_PASS'   
+                echo "mvn deploy -DskipTests"// -Ddockerfile.username=$DOCKER_USER -Ddockerfile.password=$DOCKER_PASS'   
 //                sh 'mvn deploy -DskipTests -Ddockerfile.username=$DOCKER_USER -Ddockerfile.password=$DOCKER_PASS'                 
             }                        
         }                  
