@@ -3,13 +3,7 @@ def source = env.TAG_NAME ? env.TAG_NAME : env.BRANCH_NAME
 
 
 def deployOpenShift(env) { 
-  	connectOpenShift(env)
-  	
-  	if (env =="master")
-  		echo "LA RAMA ES LA master"
-  	else
-  		echo "la mama es OTRA"
-  		            	                       
+  	connectOpenShift(env)            	                       
 	script {                
     	try{                           		    
         	deployApp()
@@ -24,10 +18,8 @@ def deployOpenShift(env) {
 }
 
 
-def connectOpenShift(env) { 
-	
-	
-	if (returnEnviornmet){
+def connectOpenShift(env) { 		
+	if (env==ENVIRONMET_PRE){
 		echo "DEPLOYING in PRE..."
 		sh "oc login ${OPENSHIFT_ENPOINT_PRE} --token=${OPENSHIFT_TOKEN_PRE}"                
 		sh "oc project $OPENSHIFT_PROJECT_PRE"	    
@@ -50,11 +42,6 @@ def deployApp() {
 def deployImage() { 	
 	sh "oc import-image ${artifactID}:${artifactID}-${artifactVersion} --from aherreros/microservicesdocomo:${artifactID}-${artifactVersion}"     
 }
-
-def returnEnviornmet(env) { 	
-	return  env == "master"   
-}
-
 
 def updateEnvironment(env) { 	
 	sh "oc set env dc/${artifactID} GIT_URI=https://github.com/marceito2002/configServerPruebas.git"
@@ -133,19 +120,18 @@ pipeline {
         }                  
 
         stage('Deploy Openshift Preproduction') {                
-            //when { branch 'develop' }
-            
+            when { branch 'develop' }
             steps {   	
-                deployOpenShift(branch)                                                         
+                deployOpenShift(ENVIRONMET_PRE)                                                         
             }          
         }  
         
-        //stage('Deploy Openshift Production') {
-            //when { branch 'master' }                
-         //   steps {            		
-         //       deployOpenShift(branch)                                                                     
-         //   }          
-        //}                          
+        stage('Deploy Openshift Production') {
+            when { branch 'master' }                
+            steps {            		
+                deployOpenShift(ENVIRONMET_PRO)                                                                     
+            }          
+        }                          
 
     }
     post {
