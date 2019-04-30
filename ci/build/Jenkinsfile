@@ -248,8 +248,6 @@ pipeline {
 	        	} catch (all) {
 	            	// if any exception occurs, mark the build as failed
 	            	echo "REVIENTA"
-					echo all
-
 	        	}
 	        	} 			 
 	//		Actualizar cuando cambia la imagen docker 
