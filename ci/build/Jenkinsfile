@@ -1,5 +1,11 @@
 def source = env.TAG_NAME ? env.TAG_NAME : env.BRANCH_NAME
 
+def buildProject() {
+return {    
+	echo "ESTA EN UNA FUNCION"     
+  }
+}
+
 
 import com.buongiorno.jenkinsci.plugins.delivery.*;
 
@@ -33,6 +39,7 @@ pipeline {
 
         stage('Build') {
             steps {
+            buildProject()
             echo "DATOS DE ENTRADA....$source"                    	   				                                  
                 sh 'mvn -B -DskipTests -Ddockerfile.skip=true clean package'               
             }
@@ -105,8 +112,6 @@ pipeline {
 	                	sh "oc expose svc/${artifactID}"
 	                	
                 	}catch (Exception e) {
-                		echo "already exist...."
-                		echo "catch exeption. currentBuild.result: ${currentBuild.result}"
                 		sh "oc import-image ${artifactID}:${artifactID}-${artifactVersion} --from aherreros/microservicesdocomo:${artifactID}-${artifactVersion}"
                 		
                 	}finally{
