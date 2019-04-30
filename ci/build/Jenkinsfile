@@ -12,7 +12,6 @@ def deployOpenShift(env) {
     		deployImage() 
     		
     	}finally{
-    		echo 'add environment....'
     		updateEnvironment(env)                	    
     	}
     }                
@@ -21,12 +20,14 @@ def deployOpenShift(env) {
 
 def connectOpenShift(env) { 
 	
-	echo "Connecting with openshift ..."
+	
 	if (env==ENVIRONMET_PRE){
+		echo "DEPLOYING in PRE..."
 		sh "oc login ${OPENSHIFT_ENPOINT_PRE} --token=${OPENSHIFT_TOKEN_PRE}"                
 		sh "oc project $OPENSHIFT_PROJECT_PRE"	    
 	}
 	else{
+	echo "DEPLOYING in PRO..."
 		sh "oc login ${OPENSHIFT_ENPOINT_PRO} --token=${OPENSHIFT_TOKEN_PRO}"                
 		sh "oc project $OPENSHIFT_PROJECT_PRO"	    
 	}
