@@ -11,15 +11,14 @@ pipeline {
         jdk 'jdk 8u71'     
         oc 'oc3'
     }
-          
-          
+                    
     environment{				
 		OPENSHIFT_PROJECT = "prueba"
 		OPENSHIFT_TOKEN="l7aP8WJIx0nuFHMX2fM-6eVVXXPNsNlSC4MRQ3xGasM"
 		OPENSHIFT_ENPOINT="https://okd-milrc1.dodi.io:8443"
 		
-		IMAGE = readMavenPom().getArtifactId()
-    	VERSION = readMavenPom().getVersion()
+		artifactID = readMavenPom().getArtifactId()
+    	artifactVersion = readMavenPom().getVersion()
     }
 
     options {
@@ -30,25 +29,16 @@ pipeline {
     stages {
 
         stage('Build') {
-            steps {        
-            
-                           
-			//	def file = readFile 'pom.xml'
-			
-	   
-	   	echo "IMAGE: ${IMAGE}"
-    	echo "VERSION: ${VERSION}"
-						    
+            steps {                    	   				   
                 echo ".Building artifact...Goal: $env.myBuildGoal and $env.myDeployGoal Revision $env.myRev Version: $env.myVersion"                                
-//                sh 'mvn -B -DskipTests -Ddockerfile.skip=true clean package'
-               
+                sh 'mvn -B -DskipTests -Ddockerfile.skip=true clean package'               
             }
         }
 
         stage('Install') {
             steps {         
                 echo 'Install artifact....'
-//                sh 'mvn -B clean install -DskipTests'                 
+                sh 'mvn -B clean install -DskipTests'                 
             }
         }
         
@@ -56,7 +46,7 @@ pipeline {
             steps {
                 echo 'Install artifact....'
                 echo "Goal: $env.myBuildGoal and $env.myDeployGoal Revision $env.myRev Version: $env.myVersion"
-//                sh 'mvn -B clean install -Ddockerfile.skip=true'                 
+                sh 'mvn -B clean install -Ddockerfile.skip=true'                 
             }
         }   
                                
@@ -67,129 +57,54 @@ pipeline {
                 echo 'Deloying artifact....'
                 echo "Goal: $env.myBuildGoal and $env.myDeployGoal Revision $env.myRev Version: $env.myVersion"
 //                sh 'mvn deploy -DskipTests -Ddockerfile.username=$DOCKER_USER -Ddockerfile.password=$DOCKER_PASS'                 
-                //sh 'mvn deploy -DskipTests'
             }                        
         }                  
 
         stage('Deploy Openshift') {
-        
-//		    when {
-//		        expression {
-//			        echo "LAS VARIASBLES DE ENTORNO SON env.VAR version set - ${env.KUBERNETES_SERVICE_HOST} as well as VAR ${KUBERNETES_SERVICE_HOST}"
-//		            openshift.withCluster() {
-//		            echo "EJECUTA OPENSHIFT"
-//		            openshift.withProject(OPENSHIFT_PROJECT) {
-
-//		                echo "ok, estoy en el proyecto: ${openshift.project()}"
-//		               	def latestDeploymentVersion = openshift.selector('dc',"configserver").object()
-//		               	echo "recoge selector"
-//		               	echo latestDeploymentVersion
-//		               	latestDeploymentVersion.describe()
-		               	
-    // Selectors also allow you to easily iterate through all objects they currently select.
-//    latestDeploymentVersion.withEach { // The closure body will be executed once for each selected object.
-        // The 'it' variable will be bound to a Selector which selects a single
-        // object which is the focus of the iteration.
-//        echo "Service account: ${it.name()} is defined in ${openshift.project()}"
-//    }
-    
-    
-    
-    		               	
-		               // return !openshift.selector("bc", "${TEMPLATE_NAME}").exists();
-//		                openshift.newBuild("--name=${TEMPLATE_NAME}", "--docker-image=docker.io/nginx:mainline-alpine", "--binary=true")
-//		                }
-//		            }
-//		        }
-//		    }        
-            steps {
-
-            	
+                
+            steps {            	
                 echo 'Deloying in openshift....'
                  
                 sh "oc login ${OPENSHIFT_ENPOINT} --token=${OPENSHIFT_TOKEN}"                
                 sh "oc project $OPENSHIFT_PROJECT"
                                 
-//                sh "oc new-app aherreros/microservicesdocomo:configserver-0.0.1-SNAPSHOT --name configserver"
-                           
-                
-                echo "oc import-image configserver:configserver-$env.myVersion --from $DOCKER_REPOSITORY:configserver-$env.myVersion"                
-//                sh 'mvn deploy -DskipTests -Ddockerfile.username=$DOCKER_USER -Ddockerfile.password=$DOCKER_PASS'                 
-                //sh 'mvn deploy -DskipTests'
+                sh "oc new-app aherreros/microservicesdocomo:${artifactID}-${artifactVersion} --name ${artifactID}"                                                          
             }          
         }                  
 
         stage('configuration environment Openshift') {
             steps {
             	script {
-				try{
-	           		sh "oc set env dc/configserver GIT_URI=https://github.com/marceito2002/configServerPruebas.git"
-				}
-				catch(all){
-	     			echo "REVIENTA 2"
-				}
-				finally{
-	     			echo "OK EL 1"
-				}
-	
-	}
-	
-	     
-				sh "oc set env dc/configserver GIT_PASS="
-				sh "oc set env dc/configserver GIT_USER="
-				sh "oc set env dc/configserver  SPRING_PROFILES_ACTIVE=openshift"
-	script {			
-				try { 
-					sh "oc expose svc/configserver"			
-	        	} catch (all) {
-	            	// if any exception occurs, mark the build as failed
-	            	echo "REVIENTA"
-	            	sh "oc import-image configserver:configserver-0.0.1-SNAPSHOT --from aherreros/microservicesdocomo:configserver-0.0.1-SNAPSHOT"
-	        	}
-	        	} 			 
-	//		Actualizar cuando cambia la imagen docker 
-	//		sh "oc import-image configserver:configserver-0.0.1-SNAPSHOT --from aherreros/microservicesdocomo:configserver-0.0.1-SNAPSHOT
-                 
+					try{
+		           		sh "oc set env dc/${artifactID} GIT_URI=https://github.com/marceito2002/configServerPruebas.git"
+					}
+					catch(all){
+		     			echo "REVIENTA 2"
+					}
+					finally{
+		     			echo "OK EL 1"
+					}
+				}		     
+				sh "oc set env dc/${artifactID} GIT_PASS="
+				sh "oc set env dc/${artifactID} GIT_USER="
+				sh "oc set env dc/${artifactID}  SPRING_PROFILES_ACTIVE=openshift"
+				script {			
+					try { 
+						sh "oc expose svc/${artifactID}"			
+		        	} catch (all) {
+		            	echo "REVIENTA"
+		            	sh "oc import-image ${artifactID}:${artifactID}-${artifactVersion} --from aherreros/microservicesdocomo:${artifactID}-${artifactVersion}T"
+		        	}
+	        	} 			                 
             }          
         }  
         
-		stage('Create Image Builder with plugin') {
-		    when {
-		        expression {
-			        echo "LAS VARIASBLES DE ENTORNO SON env.VAR version set - ${env.KUBERNETES_SERVICE_HOST} as well as VAR ${KUBERNETES_SERVICE_HOST}"
-		            openshift.withCluster() {
-		            echo "EJECUTA OPENSHIFT"
-		            openshift.withProject(OPENSHIFT_PROJECT) {
-		            	echo "vemos los proyectow"
-		                echo "ok, estoy en el proyecto: ${openshift.project()}"
-		               // return !openshift.selector("bc", "${TEMPLATE_NAME}").exists();
-//		                openshift.newBuild("--name=${TEMPLATE_NAME}", "--docker-image=docker.io/nginx:mainline-alpine", "--binary=true")
-		                }
-		            }
-		        }
-		    }
-		    steps {
-		     echo "EJECUTA OPENSHIFT"
-	         script {
-		            openshift.withCluster() {
-		            echo "cluster OPENSHIFT"
-		                openshift.withProject(OPENSHIFT_PROJECT) {
-		                echo "ok, estoy en el proyecto: ${openshift.project()}"
-//		                    openshift.newApp("aherreros/microservicesdocomo:configserver-0.0.1-SNAPSHOT --name configservere")
 
-		                }
-		            }
-		        }
-		    }
-		}	
     }
     post {
         always {
             script {
                 currentBuild.result = currentBuild.result ?: 'SUCCESS'
-                //notifyBitbucket()
-                //echo 'stoping consumers....'
-                //sh 'docker-compose -f ./ci/local/docker-compose.yml down'                
             }
         }
     }
