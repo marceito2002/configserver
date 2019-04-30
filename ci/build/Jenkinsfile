@@ -5,7 +5,7 @@ def source = env.TAG_NAME ? env.TAG_NAME : env.BRANCH_NAME
 def deployOpenShift(env) { 
   	connectOpenShift(env)
   	
-  	if (branch =="master")
+  	if (env =="master")
   		echo "LA RAMA ES LA master"
   	else
   		echo "la mama es OTRA"
@@ -27,13 +27,13 @@ def deployOpenShift(env) {
 def connectOpenShift(env) { 
 	
 	
-	if (env==ENVIRONMET_PRE){
+	if (returnEnviornmet){
 		echo "DEPLOYING in PRE..."
 		sh "oc login ${OPENSHIFT_ENPOINT_PRE} --token=${OPENSHIFT_TOKEN_PRE}"                
 		sh "oc project $OPENSHIFT_PROJECT_PRE"	    
 	}
 	else{
-	echo "DEPLOYING in PRO..."
+		echo "DEPLOYING in PRO..."
 		sh "oc login ${OPENSHIFT_ENPOINT_PRO} --token=${OPENSHIFT_TOKEN_PRO}"                
 		sh "oc project $OPENSHIFT_PROJECT_PRO"	    
 	}
