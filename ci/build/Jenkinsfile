@@ -23,9 +23,7 @@ pipeline {
         disableConcurrentBuilds()
         buildDiscarder(logRotator(numToKeepStr: '3', artifactNumToKeepStr: '3'))
     }
-	def getReleasedVersion() {
-    	return (readFile('pom.xml') =~ '<version>(.+)-SNAPSHOT</version>')[0][1]
-	}
+
     stages {
 
         stage('Build') {
@@ -34,10 +32,11 @@ pipeline {
                            
 			//	def file = readFile 'pom.xml'
 			
-
-			releasedVersion = getReleasedVersion()
+	   
+	
+			releasedVersion = readFile('pom.xml')
 						    
-                echo "Building artifact...Goal: $env.myBuildGoal and $env.myDeployGoal Revision $env.myRev Version: $env.myVersion"                                
+                echo "$releasedVersion ..Building artifact...Goal: $env.myBuildGoal and $env.myDeployGoal Revision $env.myRev Version: $env.myVersion"                                
 //                sh 'mvn -B -DskipTests -Ddockerfile.skip=true clean package'
                
             }
