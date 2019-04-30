@@ -60,10 +60,41 @@ pipeline {
             }                        
         }                  
 
-        stage('Deploy Openshift') {
-                
+        stage('Deploy Openshift Preproduction') {                
+            when { branch 'master' }
             steps {            	
-                echo 'Connecting with openshift....'                 
+                echo 'Connecting with openshift PRE....'                 
+                sh "oc login ${OPENSHIFT_ENPOINT} --token=${OPENSHIFT_TOKEN}"                
+                sh "oc project $OPENSHIFT_PROJECT"
+                echo 'Connected'
+                                
+            	script {                
+                	try{                           		    
+	                	sh "oc new-app aherreros/microservicesdocomo:${artifactID}-${artifactVersion} --name ${artifactID}"
+	                	sh "oc expose svc/${artifactID}"
+	                	
+                	}catch (Exception e) {
+                		echo "already exist...."
+                		echo "catch exeption. currentBuild.result: ${currentBuild.result}"
+                		sh "oc import-image ${artifactID}:${artifactID}-${artifactVersion} --from aherreros/microservicesdocomo:${artifactID}-${artifactVersion}"
+                		
+                	}finally{
+                		echo 'add environment....'
+		           		sh "oc set env dc/${artifactID} GIT_URI=https://github.com/marceito2002/configServerPruebas.git"
+						sh "oc set env dc/${artifactID} GIT_PASS="
+						sh "oc set env dc/${artifactID} GIT_USER="
+						sh "oc set env dc/${artifactID} SPRING_PROFILES_ACTIVE=openshift"                	    
+                	}
+                }                                                          
+            }          
+        }  
+        
+        stage('Deploy Openshift Production') {
+            when {
+                branch 'production'
+            }                
+            steps {            	
+                echo 'Connecting with openshift PRO....'                 
                 sh "oc login ${OPENSHIFT_ENPOINT} --token=${OPENSHIFT_TOKEN}"                
                 sh "oc project $OPENSHIFT_PROJECT"
                 echo 'Connected'
