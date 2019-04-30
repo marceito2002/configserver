@@ -51,8 +51,8 @@ pipeline {
         stage('Deploy nexus') {
             steps {            	
                 echo 'Deloying artifact....'
-                echo "mvn deploy -DskipTests"// -Ddockerfile.username=$DOCKER_USER -Ddockerfile.password=$DOCKER_PASS'   
-//                sh 'mvn deploy -DskipTests -Ddockerfile.username=$DOCKER_USER -Ddockerfile.password=$DOCKER_PASS'                 
+                //echo "mvn deploy -DskipTests"// -Ddockerfile.username=$DOCKER_USER -Ddockerfile.password=$DOCKER_PASS'   
+                sh 'mvn deploy -DskipTests -Ddockerfile.username=aherreros -Ddockerfile.password=pepe'                 
             }                        
         }                  
 
@@ -81,26 +81,7 @@ pipeline {
 
                 }                                                          
             }          
-        }                  
-
-//        stage('configuration environment Openshift') {
-//            steps {
-//           		sh "oc set env dc/${artifactID} GIT_URI=https://github.com/marceito2002/configServerPruebas.git"
-//				sh "oc set env dc/${artifactID} GIT_PASS="
-//				sh "oc set env dc/${artifactID} GIT_USER="
-//				sh "oc set env dc/${artifactID} SPRING_PROFILES_ACTIVE=openshift"
-//				script {			
-//					try { 
-//						sh "oc expose svc/${artifactID}"			
-//		        	} catch (all) {
-//		            	echo "REVIENTA"
-//		            	sh "oc import-image ${artifactID}:${artifactID}-${artifactVersion} --from aherreros/microservicesdocomo:${artifactID}-${artifactVersion}T"
-//			oc import-image configserver:configserver-0.0.1-SNAPSHOT --from aherreros/microservicesdocomo:configserver-0.0.1-SNAPSHOT 
-//		        	}
-//	        	} 			                 
-//            }          
-//        }  
-        
+        }                          
 
     }
     post {
