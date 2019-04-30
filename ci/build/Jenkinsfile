@@ -1,7 +1,10 @@
 def source = env.TAG_NAME ? env.TAG_NAME : env.BRANCH_NAME
 
-def buildProject() { 
-	 sh 'mvn asdfasdfasdfasdf'          
+def connectOpenShift() { 
+	echo 'Connecting with openshift PRE....'                 
+	sh "oc login ${OPENSHIFT_ENPOINT} --token=${OPENSHIFT_TOKEN}"                
+	sh "oc project $OPENSHIFT_PROJECT"
+	echo 'Connected'       
 }
 
 
@@ -36,8 +39,7 @@ pipeline {
     stages {
 
         stage('Build') {
-            steps {
-            buildProject()
+            steps {            
             echo "DATOS DE ENTRADA....$source"                    	   				                                  
                 sh 'mvn -B -DskipTests -Ddockerfile.skip=true clean package'               
             }
@@ -67,11 +69,13 @@ pipeline {
 
         stage('Deploy Openshift Preproduction') {                
             when { branch 'develop' }
-            steps {            	
-                echo 'Connecting with openshift PRE....'                 
-                sh "oc login ${OPENSHIFT_ENPOINT} --token=${OPENSHIFT_TOKEN}"                
-                sh "oc project $OPENSHIFT_PROJECT"
-                echo 'Connected'
+            steps {       
+            
+            	connectOpenShift()     	
+//                echo 'Connecting with openshift PRE....'                 
+  //              sh "oc login ${OPENSHIFT_ENPOINT} --token=${OPENSHIFT_TOKEN}"                
+    //            sh "oc project $OPENSHIFT_PROJECT"
+      //          echo 'Connected'
                                 
             	script {                
                 	try{                           		    
