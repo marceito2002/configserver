@@ -12,6 +12,7 @@ pipeline {
         oc 'oc3'
     }
           
+          
     environment{				
 		OPENSHIFT_PROJECT = "prueba"
 		OPENSHIFT_TOKEN="l7aP8WJIx0nuFHMX2fM-6eVVXXPNsNlSC4MRQ3xGasM"
@@ -24,16 +25,16 @@ pipeline {
     }
 
     stages {
-	           
+	           			def getReleasedVersion() {
+    			return (readFile('pom.xml') =~ '<version>(.+)-SNAPSHOT</version>')[0][1]
+			}
         stage('Build') {
             steps {        
             
                            
 			//	def file = readFile 'pom.xml'
 			
-			def getReleasedVersion() {
-    			return (readFile('pom.xml') =~ '<version>(.+)-SNAPSHOT</version>')[0][1]
-			}
+
 			releasedVersion = getReleasedVersion()
 						    
                 echo "Building artifact...Goal: $env.myBuildGoal and $env.myDeployGoal Revision $env.myRev Version: $env.myVersion"                                
