@@ -51,11 +51,9 @@ pipeline {
         }   
                                
         stage('Deploy nexus') {
-            steps {
-            	sh "docker images"
-            	
+            steps {            	
                 echo 'Deloying artifact....'
-                echo "Goal: $env.myBuildGoal and $env.myDeployGoal Revision $env.myRev Version: $env.myVersion"
+                echo 'mvn deploy -DskipTests -Ddockerfile.username=$DOCKER_USER -Ddockerfile.password=$DOCKER_PASS'   
 //                sh 'mvn deploy -DskipTests -Ddockerfile.username=$DOCKER_USER -Ddockerfile.password=$DOCKER_PASS'                 
             }                        
         }                  
@@ -67,37 +65,41 @@ pipeline {
                  
                 sh "oc login ${OPENSHIFT_ENPOINT} --token=${OPENSHIFT_TOKEN}"                
                 sh "oc project $OPENSHIFT_PROJECT"
-                                
-                sh "oc new-app aherreros/microservicesdocomo:${artifactID}-${artifactVersion} --name ${artifactID}"                                                          
+            	script {                
+                	try{                           		    
+	                	sh "oc new-app aherreros/microservicesdocomo:${artifactID}-${artifactVersion} --name ${artifactID}"
+	                	sh "oc expose svc/${artifactID}"
+                	}catch (all) {
+                		echo 'already exist....'
+                		sh "oc import-image ${artifactID}:${artifactID}-${artifactVersion} --from aherreros/microservicesdocomo:${artifactID}-${artifactVersion}T"
+                	}finally{
+                		echo 'environment....'
+		           		sh "oc set env dc/${artifactID} GIT_URI=https://github.com/marceito2002/configServerPruebas.git"
+						sh "oc set env dc/${artifactID} GIT_PASS="
+						sh "oc set env dc/${artifactID} GIT_USER="
+						sh "oc set env dc/${artifactID} SPRING_PROFILES_ACTIVE=openshift"                	    
+                	}
+
+                }                                                          
             }          
         }                  
 
-        stage('configuration environment Openshift') {
-            steps {
-            	script {
-					try{
-		           		sh "oc set env dc/${artifactID} GIT_URI=https://github.com/marceito2002/configServerPruebas.git"
-					}
-					catch(all){
-		     			echo "REVIENTA 2"
-					}
-					finally{
-		     			echo "OK EL 1"
-					}
-				}		     
-				sh "oc set env dc/${artifactID} GIT_PASS="
-				sh "oc set env dc/${artifactID} GIT_USER="
-				sh "oc set env dc/${artifactID}  SPRING_PROFILES_ACTIVE=openshift"
-				script {			
-					try { 
-						sh "oc expose svc/${artifactID}"			
-		        	} catch (all) {
-		            	echo "REVIENTA"
-		            	sh "oc import-image ${artifactID}:${artifactID}-${artifactVersion} --from aherreros/microservicesdocomo:${artifactID}-${artifactVersion}T"
-		        	}
-	        	} 			                 
-            }          
-        }  
+//        stage('configuration environment Openshift') {
+//            steps {
+//           		sh "oc set env dc/${artifactID} GIT_URI=https://github.com/marceito2002/configServerPruebas.git"
+//				sh "oc set env dc/${artifactID} GIT_PASS="
+//				sh "oc set env dc/${artifactID} GIT_USER="
+//				sh "oc set env dc/${artifactID} SPRING_PROFILES_ACTIVE=openshift"
+//				script {			
+//					try { 
+//						sh "oc expose svc/${artifactID}"			
+//		        	} catch (all) {
+//		            	echo "REVIENTA"
+//		            	sh "oc import-image ${artifactID}:${artifactID}-${artifactVersion} --from aherreros/microservicesdocomo:${artifactID}-${artifactVersion}T"
+//		        	}
+//	        	} 			                 
+//            }          
+//        }  
         
 
     }
