@@ -25,7 +25,7 @@ def deployImage() {
 	sh "oc import-image ${artifactID}:${artifactID}-${artifactVersion} --from aherreros/microservicesdocomo:${artifactID}-${artifactVersion}"     
 }
 
-def updateEnvironmentOpenShift(env) { 	
+def updateEnvironment(env) { 	
 	sh "oc set env dc/${artifactID} GIT_URI=https://github.com/marceito2002/configServerPruebas.git"
 	sh "oc set env dc/${artifactID} GIT_PASS="
 	sh "oc set env dc/${artifactID} GIT_USER="
