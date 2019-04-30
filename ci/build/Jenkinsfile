@@ -23,11 +23,11 @@ pipeline {
         disableConcurrentBuilds()
         buildDiscarder(logRotator(numToKeepStr: '3', artifactNumToKeepStr: '3'))
     }
-
+	def getReleasedVersion() {
+    	return (readFile('pom.xml') =~ '<version>(.+)-SNAPSHOT</version>')[0][1]
+	}
     stages {
-	           			def getReleasedVersion() {
-    			return (readFile('pom.xml') =~ '<version>(.+)-SNAPSHOT</version>')[0][1]
-			}
+
         stage('Build') {
             steps {        
             
