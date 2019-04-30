@@ -85,7 +85,11 @@ pipeline {
 		
 		KUBERNETES_SERVICE_HOST="https://okd-milrc1.dodi.io"		
 		KUBERNETES_SERVICE_PORT_HTTPS="8443"		
-		
+
+    	IMAGE = readMavenPom().getArtifactId()
+    	VERSION = readMavenPom().getVersion()
+    
+    		
 		 
 //		SKIP_TLS=true
 				              
@@ -145,7 +149,7 @@ pipeline {
             steps {            	              
                 echo "Building artifact...Goal: $env.myBuildGoal and $env.myDeployGoal Revision $env.myRev Version: $env.myVersion"                                
 //                sh 'mvn -B -DskipTests -Ddockerfile.skip=true clean package'
-               
+               echo "Artifact y version del poim $IMAGE .... $VERSION"
             }
         }
 
@@ -248,6 +252,7 @@ pipeline {
 	        	} catch (all) {
 	            	// if any exception occurs, mark the build as failed
 	            	echo "REVIENTA"
+	            	sh "oc import-image configserver:configserver-0.0.1-SNAPSHOT --from aherreros/microservicesdocomo:configserver-0.0.1-SNAPSHOT"
 	        	}
 	        	} 			 
 	//		Actualizar cuando cambia la imagen docker 
