@@ -101,6 +101,144 @@ pipeline {
         stage('Deploy Openshift Production') {
             when { branch 'master' }                
             steps {            	
+            
+            def source = env.TAG_NAME ? env.TAG_NAME : env.BRANCH_NAME
+
+def connectOpenShift() { 
+	echo 'Connecting with openshift PRE....'                 
+	sh "oc login ${OPENSHIFT_ENPOINT} --token=${OPENSHIFT_TOKEN}"                
+	sh "oc project $OPENSHIFT_PROJECT"
+	echo 'Connected'       
+}
+
+
+import com.buongiorno.jenkinsci.plugins.delivery.*;
+
+
+
+
+pipeline {
+    agent any
+
+    tools {
+        maven 'Maven 3.5.0'
+        jdk 'jdk 8u71'     
+        oc 'oc3'
+    }
+                    
+    environment{				
+		OPENSHIFT_PROJECT = "prueba"
+		OPENSHIFT_TOKEN="l7aP8WJIx0nuFHMX2fM-6eVVXXPNsNlSC4MRQ3xGasM"
+		OPENSHIFT_ENPOINT="https://okd-milrc1.dodi.io:8443"
+		
+		artifactID = readMavenPom().getArtifactId()
+    	artifactVersion = readMavenPom().getVersion()
+    }
+
+    options {
+        disableConcurrentBuilds()
+        buildDiscarder(logRotator(numToKeepStr: '3', artifactNumToKeepStr: '3'))
+    }
+
+    stages {
+
+        stage('Build') {
+            steps {            
+            echo "DATOS DE ENTRADA....$source"                    	   				                                  
+                sh 'mvn -B -DskipTests -Ddockerfile.skip=true clean package'               
+            }
+        }
+
+        stage('Install') {
+            steps {         
+                echo 'Install artifact....'
+                sh 'mvn -B clean install -DskipTests'                 
+            }
+        }
+        
+        stage('Test') {
+            steps {
+                echo 'Install artifact....'
+                sh 'mvn -B clean install -Ddockerfile.skip=true'                 
+            }
+        }   
+                               
+        stage('Deploy nexus') {
+            steps {            	
+                echo 'Deloying artifact....'
+                //echo "mvn deploy -DskipTests"// -Ddockerfile.username=$DOCKER_USER -Ddockerfile.password=$DOCKER_PASS'   
+                //sh 'mvn deploy -DskipTests -Ddockerfile.username=aherreros -Ddockerfile.password=pepe'                 
+            }                        
+        }                  
+
+        stage('Deploy Openshift Preproduction') {                
+            when { branch 'develop' }
+            steps {       
+            
+            	connectOpenShift()     	
+//                echo 'Connecting with openshift PRE....'                 
+  //              sh "oc login ${OPENSHIFT_ENPOINT} --token=${OPENSHIFT_TOKEN}"                
+    //            sh "oc project $OPENSHIFT_PROJECT"
+      //          echo 'Connected'
+                                
+            	script {                
+                	try{                           		    
+	                	sh "oc new-app aherreros/microservicesdocomo:${artifactID}-${artifactVersion} --name ${artifactID}"
+	                	sh "oc expose svc/${artifactID}"
+	                	
+                	}catch (Exception e) {
+                		echo "already exist...."
+                		echo "catch exeption. currentBuild.result: ${currentBuild.result}"
+                		sh "oc import-image ${artifactID}:${artifactID}-${artifactVersion} --from aherreros/microservicesdocomo:${artifactID}-${artifactVersion}"
+                		
+                	}finally{
+                		echo 'add environment....'
+		           		sh "oc set env dc/${artifactID} GIT_URI=https://github.com/marceito2002/configServerPruebas.git"
+						sh "oc set env dc/${artifactID} GIT_PASS="
+						sh "oc set env dc/${artifactID} GIT_USER="
+						sh "oc set env dc/${artifactID} SPRING_PROFILES_ACTIVE=openshift"                	    
+                	}
+                }                                                          
+            }          
+        }  
+        
+        stage('Deploy Openshift Production') {
+            when { branch 'master' }                
+            steps {            	
+                //echo 'Connecting with openshift PRO....'                 
+                //sh "oc login ${OPENSHIFT_ENPOINT} --token=${OPENSHIFT_TOKEN}"                
+                //sh "oc project $OPENSHIFT_PROJECT"
+                //echo 'Connected'
+                connectOpenShift()  
+                                
+            	script {                
+                	try{                           		    
+	                	sh "oc new-app aherreros/microservicesdocomo:${artifactID}-${artifactVersion} --name ${artifactID}"
+	                	sh "oc expose svc/${artifactID}"
+	                	
+                	}catch (Exception e) {
+                		sh "oc import-image ${artifactID}:${artifactID}-${artifactVersion} --from aherreros/microservicesdocomo:${artifactID}-${artifactVersion}"
+                		
+                	}finally{
+                		echo 'add environment....'
+		           		sh "oc set env dc/${artifactID} GIT_URI=https://github.com/marceito2002/configServerPruebas.git"
+						sh "oc set env dc/${artifactID} GIT_PASS="
+						sh "oc set env dc/${artifactID} GIT_USER="
+						sh "oc set env dc/${artifactID} SPRING_PROFILES_ACTIVE=openshift"                	    
+                	}
+                }                                                          
+            }          
+        }                          
+
+    }
+    post {
+        always {
+            script {
+                currentBuild.result = currentBuild.result ?: 'SUCCESS'
+            }
+        }
+    }
+}
                 echo 'Connecting with openshift PRO....'                 
                 sh "oc login ${OPENSHIFT_ENPOINT} --token=${OPENSHIFT_TOKEN}"                
                 sh "oc project $OPENSHIFT_PROJECT"
