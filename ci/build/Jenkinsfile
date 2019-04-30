@@ -72,9 +72,6 @@ pipeline {
 
 		DOCKER_REPOSITORY= "aherreros/microservicesdocomo"
 		DOCKER_USER="alfonso.herreros"
-		DOCKER_PASS="pepito"
-		IMAGE=""
-		VERSION=""
 				
 		OPENSHIFT_PROJECT = "prueba"
 		OPENSHIFT_TOKEN="l7aP8WJIx0nuFHMX2fM-6eVVXXPNsNlSC4MRQ3xGasM"
@@ -145,12 +142,8 @@ pipeline {
         
         stage('Build') {
             steps {        
-            
-    IMAGE = readMavenPom().getArtifactId()
-    VERSION = readMavenPom().getVersion()
-    echo "IMAGE: ${IMAGE}"
-    echo "VERSION: ${VERSION}"
-    
+               
+    				def pom = readMavenPom file: 'pom.xml'
     
                 echo "Building artifact...Goal: $env.myBuildGoal and $env.myDeployGoal Revision $env.myRev Version: $env.myVersion"                                
 //                sh 'mvn -B -DskipTests -Ddockerfile.skip=true clean package'
