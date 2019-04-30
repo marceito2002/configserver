@@ -3,7 +3,13 @@ def source = env.TAG_NAME ? env.TAG_NAME : env.BRANCH_NAME
 
 
 def deployOpenShift(env) { 
-  	connectOpenShift(env)            	                       
+  	connectOpenShift(env)
+  	
+  	if (branch =="master")
+  		echo "LA RAMA ES LA master"
+  	else
+  		echo "la mama es OTRA"
+  		            	                       
 	script {                
     	try{                           		    
         	deployApp()
@@ -44,6 +50,11 @@ def deployApp() {
 def deployImage() { 	
 	sh "oc import-image ${artifactID}:${artifactID}-${artifactVersion} --from aherreros/microservicesdocomo:${artifactID}-${artifactVersion}"     
 }
+
+def returnEnviornmet(env) { 	
+	return  env == "master"   
+}
+
 
 def updateEnvironment(env) { 	
 	sh "oc set env dc/${artifactID} GIT_URI=https://github.com/marceito2002/configServerPruebas.git"
@@ -122,18 +133,19 @@ pipeline {
         }                  
 
         stage('Deploy Openshift Preproduction') {                
-            when { branch 'develop' }
+            //when { branch 'develop' }
+            
             steps {   	
-                deployOpenShift(ENVIRONMET_PRE)                                                         
+                deployOpenShift(branch)                                                         
             }          
         }  
         
-        stage('Deploy Openshift Production') {
-            when { branch 'master' }                
-            steps {            		
-                deployOpenShift(ENVIRONMET_PRO)                                                                     
-            }          
-        }                          
+        //stage('Deploy Openshift Production') {
+            //when { branch 'master' }                
+         //   steps {            		
+         //       deployOpenShift(branch)                                                                     
+         //   }          
+        //}                          
 
     }
     post {
