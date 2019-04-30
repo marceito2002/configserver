@@ -15,13 +15,13 @@ def connectOpenShift(env) {
 }
 
 
-def deployAppShift() { 
+def deployApp() { 
 	sh "oc new-app aherreros/microservicesdocomo:${artifactID}-${artifactVersion} --name ${artifactID}"
 	sh "oc expose svc/${artifactID}"       
 }
 
 
-def deployImageOpenShift() { 	
+def deployImage() { 	
 	sh "oc import-image ${artifactID}:${artifactID}-${artifactVersion} --from aherreros/microservicesdocomo:${artifactID}-${artifactVersion}"     
 }
 
@@ -33,7 +33,21 @@ def updateEnvironmentOpenShift(env) {
 }
 
 
-
+def deployOpenShift(env) { 
+  	connectOpenShift(env)            	                       
+	script {                
+    	try{                           		    
+        	deployApp()
+        	
+    	}catch (Exception e) {
+    		deployImage() 
+    		
+    	}finally{
+    		echo 'add environment....'
+    		updateEnvironment(env)                	    
+    	}
+    }                
+}
 
 import com.buongiorno.jenkinsci.plugins.delivery.*;
 
@@ -106,40 +120,40 @@ pipeline {
             when { branch 'develop' }
             steps {   
             
-            	connectOpenShift(ENVIRONMET_PRE)         	
-                                
-            	script {                
-                	try{                           		
-                		deployAppShift()    
+            	//connectOpenShift(ENVIRONMET_PRE)         	
+                deployOpenShift(ENVIRONMET_PRE)            
+            	//script {                
+                //	try{                           		
+                // 		deployApp()    
 	                	
-                	}catch (Exception e) {
-                		deployImageOpenShift()
-                		
-                	}finally{                		
-                		echo 'add environment....'
-                		updateEnvironmentOpenShift(ENVIRONMET_PRE)                	    
-                	}
-                }                                                          
+                //	}catch (Exception e) {
+                //		deployImage()
+                //		
+                //	}finally{                		
+                //		echo 'add environment....'
+                //		updateEnvironment(ENVIRONMET_PRE)                	    
+                //	}
+                //}                                                          
             }          
         }  
         
         stage('Deploy Openshift Production') {
             when { branch 'master' }                
             steps {            	
-            	connectOpenShift(ENVIRONMET_PRO)            	
-                                
-            	script {                
-                	try{                           		    
-	                	deployAppShift()
+            	//connectOpenShift(ENVIRONMET_PRE)         	
+                deployOpenShift(ENVIRONMET_PRO)            
+            	//script {                
+                //	try{                           		
+                // 		deployApp()    
 	                	
-                	}catch (Exception e) {
-                		deployImageOpenShift() 
-                		
-                	}finally{
-                		echo 'add environment....'
-                		updateEnvironmentOpenShift(ENVIRONMET_PRO)                	    
-                	}
-                }                                                          
+                //	}catch (Exception e) {
+                //		deployImage()
+                //		
+                //	}finally{                		
+                //		echo 'add environment....'
+                //		updateEnvironment(ENVIRONMET_PRE)                	    
+                //	}
+                //}                                                           
             }          
         }                          
 
