@@ -75,8 +75,10 @@ pipeline {
 		DOCKER_PASS="pepito"
 				
 		OPENSHIFT_PROJECT = "prueba"
-		OPENSHIFT_TOKEN="1GBRtUh37CLj2uWCSoyGKV3YQM-3os7ZZOvbsIjheMc"
+		OPENSHIFT_TOKEN="naDgXfA2OHwd_TD9o6uWxhsX1CTrOnCUUJsFCyCeh0M"
 		OPENSHIFT_ENPOINT="https://okd-milrc1.dodi.io:8443"
+		
+		// oc login --token naDgXfA2OHwd_TD9o6uWxhsX1CTrOnCUUJsFCyCeh0M okd-milrc1.dodi.io:8443
 		
 		
 		TEMPLATE_NAME = "trackingPrueba"
@@ -186,7 +188,7 @@ pipeline {
 		            openshift.withProject(OPENSHIFT_PROJECT) {
 
 		                echo "ok, estoy en el proyecto: ${openshift.project()}"
-		               	def latestDeploymentVersion = openshift.selector('dc',"configserver").object().status.latestVersion
+		               	def latestDeploymentVersion = openshift.selector('dc',"configserver").object()
 		               	echo "recoge selector"
 		               	echo latestDeploymentVersion
 		               	latestDeploymentVersion.describe()
