@@ -1,5 +1,24 @@
 def source = env.TAG_NAME ? env.TAG_NAME : env.BRANCH_NAME
 
+
+
+def deployOpenShift(env) { 
+  	connectOpenShift(env)            	                       
+	script {                
+    	try{                           		    
+        	deployApp()
+        	
+    	}catch (Exception e) {
+    		deployImage() 
+    		
+    	}finally{
+    		echo 'add environment....'
+    		updateEnvironment(env)                	    
+    	}
+    }                
+}
+
+
 def connectOpenShift(env) { 
 	
 	echo "Connecting with openshift ..."
@@ -33,21 +52,6 @@ def updateEnvironment(env) {
 }
 
 
-def deployOpenShift(env) { 
-  	connectOpenShift(env)            	                       
-	script {                
-    	try{                           		    
-        	deployApp()
-        	
-    	}catch (Exception e) {
-    		deployImage() 
-    		
-    	}finally{
-    		echo 'add environment....'
-    		updateEnvironment(env)                	    
-    	}
-    }                
-}
 
 import com.buongiorno.jenkinsci.plugins.delivery.*;
 
@@ -118,42 +122,15 @@ pipeline {
 
         stage('Deploy Openshift Preproduction') {                
             when { branch 'develop' }
-            steps {   
-            
-            	//connectOpenShift(ENVIRONMET_PRE)         	
-                deployOpenShift(ENVIRONMET_PRE)            
-            	//script {                
-                //	try{                           		
-                // 		deployApp()    
-	                	
-                //	}catch (Exception e) {
-                //		deployImage()
-                //		
-                //	}finally{                		
-                //		echo 'add environment....'
-                //		updateEnvironment(ENVIRONMET_PRE)                	    
-                //	}
-                //}                                                          
+            steps {   	
+                deployOpenShift(ENVIRONMET_PRE)                                                         
             }          
         }  
         
         stage('Deploy Openshift Production') {
             when { branch 'master' }                
-            steps {            	
-            	//connectOpenShift(ENVIRONMET_PRE)         	
-                deployOpenShift(ENVIRONMET_PRO)            
-            	//script {                
-                //	try{                           		
-                // 		deployApp()    
-	                	
-                //	}catch (Exception e) {
-                //		deployImage()
-                //		
-                //	}finally{                		
-                //		echo 'add environment....'
-                //		updateEnvironment(ENVIRONMET_PRE)                	    
-                //	}
-                //}                                                           
+            steps {            		
+                deployOpenShift(ENVIRONMET_PRO)                                                                     
             }          
         }                          
 
