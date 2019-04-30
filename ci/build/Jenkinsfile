@@ -52,7 +52,7 @@ pipeline {
             steps {            	
                 echo 'Deloying artifact....'
                 //echo "mvn deploy -DskipTests"// -Ddockerfile.username=$DOCKER_USER -Ddockerfile.password=$DOCKER_PASS'   
-                sh 'mvn deploy -DskipTests -Ddockerfile.username=aherreros -Ddockerfile.password=pepe'                 
+                //sh 'mvn deploy -DskipTests -Ddockerfile.username=aherreros -Ddockerfile.password=pepe'                 
             }                        
         }                  
 
