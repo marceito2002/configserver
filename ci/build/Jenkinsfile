@@ -1,9 +1,16 @@
 def source = env.TAG_NAME ? env.TAG_NAME : env.BRANCH_NAME
 
-def connectOpenShift(enviroment) { 
-	echo 'Connecting with openshift $enviroment....'                 
-	sh "oc login ${OPENSHIFT_ENPOINT} --token=${OPENSHIFT_TOKEN}"                
-	sh "oc project $OPENSHIFT_PROJECT"
+def connectOpenShift(env) { 
+	
+	echo "Connecting with openshift ..."
+	if (env==ENVIRONMET_PRE){
+		sh "oc login ${OPENSHIFT_ENPOINT_PRE} --token=${OPENSHIFT_TOKEN_PRE}"                
+		sh "oc project $OPENSHIFT_PROJECT_PRE"	    
+	}
+	else{
+		sh "oc login ${OPENSHIFT_ENPOINT_PRO} --token=${OPENSHIFT_TOKEN_PRO}"                
+		sh "oc project $OPENSHIFT_PROJECT_PRO"	    
+	}
 	echo 'Connected'       
 }
 
@@ -18,7 +25,7 @@ def deployImageOpenShift() {
 	sh "oc import-image ${artifactID}:${artifactID}-${artifactVersion} --from aherreros/microservicesdocomo:${artifactID}-${artifactVersion}"     
 }
 
-def updateEnvironmentOpenShift() { 	
+def updateEnvironmentOpenShift(enviroment) { 	
 	sh "oc import-image ${artifactID}:${artifactID}-${artifactVersion} --from aherreros/microservicesdocomo:${artifactID}-${artifactVersion}"     
 }
 
@@ -39,11 +46,19 @@ pipeline {
         oc 'oc3'
     }
                     
-    environment{				
-		OPENSHIFT_PROJECT = "prueba"
-		OPENSHIFT_TOKEN="l7aP8WJIx0nuFHMX2fM-6eVVXXPNsNlSC4MRQ3xGasM"
-		OPENSHIFT_ENPOINT="https://okd-milrc1.dodi.io:8443"
-		
+    environment{
+
+    	ENVIRONMET_PRE ="PRO"				
+		OPENSHIFT_PROJECT_PRE = "prueba"
+		OPENSHIFT_TOKEN_PRE="l7aP8WJIx0nuFHMX2fM-6eVVXXPNsNlSC4MRQ3xGasM"
+		OPENSHIFT_ENPOINT_PRE="https://okd-milrc1.dodi.io:8443"
+
+    	ENVIRONMET_PRE ="PRE"		
+		OPENSHIFT_PROJECT_PRO = "prueba"
+		OPENSHIFT_TOKEN_PRO="l7aP8WJIx0nuFHMX2fM-6eVVXXPNsNlSC4MRQ3xGasM"
+		OPENSHIFT_ENPOINT_PRO="https://okd-milrc1.dodi.io:8443"
+
+
 		artifactID = readMavenPom().getArtifactId()
     	artifactVersion = readMavenPom().getVersion()
     }
@@ -88,7 +103,7 @@ pipeline {
             when { branch 'develop' }
             steps {   
             
-            	connectOpenShift("pre")         	
+            	connectOpenShift(ENVIRONMET_PRE)         	
                                 
             	script {                
                 	try{                           		
@@ -102,7 +117,7 @@ pipeline {
                 		
                 	}finally{                		
                 		echo 'add environment....'
-                		updateEnvironmentOpenShift("pre")
+                		updateEnvironmentOpenShift(ENVIRONMET_PRE)
 		           		//sh "oc set env dc/${artifactID} GIT_URI=https://github.com/marceito2002/configServerPruebas.git"
 						//sh "oc set env dc/${artifactID} GIT_PASS="
 						//sh "oc set env dc/${artifactID} GIT_USER="
@@ -115,7 +130,7 @@ pipeline {
         stage('Deploy Openshift Production') {
             when { branch 'master' }                
             steps {            	
-            	connectOpenShift("pro")            	
+            	connectOpenShift(ENVIRONMET_PRO)            	
                                 
             	script {                
                 	try{                           		    
@@ -128,7 +143,7 @@ pipeline {
                 		
                 	}finally{
                 		echo 'add environment....'
-                		updateEnvironmentOpenShift("pro")
+                		updateEnvironmentOpenShift(ENVIRONMET_PRO)
 		           		//sh "oc set env dc/${artifactID} GIT_URI=https://github.com/marceito2002/configServerPruebas.git"
 						//sh "oc set env dc/${artifactID} GIT_PASS="
 						//sh "oc set env dc/${artifactID} GIT_USER="
