@@ -142,11 +142,8 @@ pipeline {
 	        
         
         stage('Build') {
-            steps {            	
-                echo "Building artifact...$env.TAG_NAME"                
-                echo "Goal: $env.myBuildGoal and $env.myDeployGoal Revision $env.myRev Version: $env.myVersion"
-                sh 'oc'
-                                
+            steps {            	              
+                echo "Building artifact...Goal: $env.myBuildGoal and $env.myDeployGoal Revision $env.myRev Version: $env.myVersion"                                
 //                sh 'mvn -B -DskipTests -Ddockerfile.skip=true clean package'
                
             }
@@ -213,7 +210,7 @@ pipeline {
             	
                 echo 'Deloying in openshift....'
                  
-                sh "oc login ${OPENSHIFT_ENPOINT} --token=${OPENSHIFT_TOKEN}"                
+                sh "oc login --admission-control=ServiceAccount ${OPENSHIFT_ENPOINT} --token=${OPENSHIFT_TOKEN}"                
                 sh "oc project $OPENSHIFT_PROJECT"
                                 
 //                sh "oc new-app aherreros/microservicesdocomo:configserver-0.0.1-SNAPSHOT --name configserver"
