@@ -26,7 +26,10 @@ def deployImageOpenShift() {
 }
 
 def updateEnvironmentOpenShift(env) { 	
-	sh "oc import-image ${artifactID}:${artifactID}-${artifactVersion} --from aherreros/microservicesdocomo:${artifactID}-${artifactVersion}"     
+	sh "oc set env dc/${artifactID} GIT_URI=https://github.com/marceito2002/configServerPruebas.git"
+	sh "oc set env dc/${artifactID} GIT_PASS="
+	sh "oc set env dc/${artifactID} GIT_USER="
+	sh "oc set env dc/${artifactID} SPRING_PROFILES_ACTIVE=openshift"  	     
 }
 
 
@@ -108,20 +111,13 @@ pipeline {
             	script {                
                 	try{                           		
                 		deployAppShift()    
-	                	//sh "oc new-app aherreros/microservicesdocomo:${artifactID}-${artifactVersion} --name ${artifactID}"
-	                	//sh "oc expose svc/${artifactID}"
 	                	
                 	}catch (Exception e) {
                 		deployImageOpenShift()
-                		//sh "oc import-image ${artifactID}:${artifactID}-${artifactVersion} --from aherreros/microservicesdocomo:${artifactID}-${artifactVersion}"
                 		
                 	}finally{                		
                 		echo 'add environment....'
-                		updateEnvironmentOpenShift(ENVIRONMET_PRE)
-		           		//sh "oc set env dc/${artifactID} GIT_URI=https://github.com/marceito2002/configServerPruebas.git"
-						//sh "oc set env dc/${artifactID} GIT_PASS="
-						//sh "oc set env dc/${artifactID} GIT_USER="
-						//sh "oc set env dc/${artifactID} SPRING_PROFILES_ACTIVE=openshift"                	    
+                		updateEnvironmentOpenShift(ENVIRONMET_PRE)                	    
                 	}
                 }                                                          
             }          
@@ -134,20 +130,14 @@ pipeline {
                                 
             	script {                
                 	try{                           		    
-	                	deployImageOpenShift()
-	                	//sh "oc new-app aherreros/microservicesdocomo:${artifactID}-${artifactVersion} --name ${artifactID}"
-	                	//sh "oc expose svc/${artifactID}"
+	                	deployAppShift()
 	                	
                 	}catch (Exception e) {
-                		deployImageOpenShift() //sh "oc import-image ${artifactID}:${artifactID}-${artifactVersion} --from aherreros/microservicesdocomo:${artifactID}-${artifactVersion}"
+                		deployImageOpenShift() 
                 		
                 	}finally{
                 		echo 'add environment....'
-                		updateEnvironmentOpenShift(ENVIRONMET_PRO)
-		           		//sh "oc set env dc/${artifactID} GIT_URI=https://github.com/marceito2002/configServerPruebas.git"
-						//sh "oc set env dc/${artifactID} GIT_PASS="
-						//sh "oc set env dc/${artifactID} GIT_USER="
-						//sh "oc set env dc/${artifactID} SPRING_PROFILES_ACTIVE=openshift"                	    
+                		updateEnvironmentOpenShift(ENVIRONMET_PRO)                	    
                 	}
                 }                                                          
             }          
