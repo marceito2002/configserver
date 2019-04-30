@@ -16,7 +16,10 @@ pipeline {
     environment{				
 		OPENSHIFT_PROJECT = "prueba"
 		OPENSHIFT_TOKEN="l7aP8WJIx0nuFHMX2fM-6eVVXXPNsNlSC4MRQ3xGasM"
-		OPENSHIFT_ENPOINT="https://okd-milrc1.dodi.io:8443"					             
+		OPENSHIFT_ENPOINT="https://okd-milrc1.dodi.io:8443"
+		
+		IMAGE = readMavenPom().getArtifactId()
+    	VERSION = readMavenPom().getVersion()
     }
 
     options {
@@ -33,9 +36,8 @@ pipeline {
 			//	def file = readFile 'pom.xml'
 			
 	   
-	
-			readMavenPom file: 'pom.xml'
-			caraCulo file: 'pom.xml'
+	   	echo "IMAGE: ${IMAGE}"
+    	echo "VERSION: ${VERSION}"
 						    
                 echo ".Building artifact...Goal: $env.myBuildGoal and $env.myDeployGoal Revision $env.myRev Version: $env.myVersion"                                
 //                sh 'mvn -B -DskipTests -Ddockerfile.skip=true clean package'
