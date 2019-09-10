@@ -1,0 +1,1 @@
+[![Build Status](https://dev.azure.com/aherreros/aherreros/_apis/build/status/marceito2002.configserver?branchName=master)](https://dev.azure.com/aherreros/aherreros/_build/latest?definitionId=1&branchName=master)
